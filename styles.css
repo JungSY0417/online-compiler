@@ -1,0 +1,59 @@
+fieldset {
+	padding:0px;
+	margin:0px 0px 5px 0px;
+}
+
+textarea {
+	width: 100%;
+	resize:none;
+	overflow-x:hidden;
+	overflow-y:auto;
+	padding: 5px;
+	margin: 0px;
+}
+
+.button {
+	display:inline;
+}
+
+div.numberedtextarea-wrapper {
+	position: relative;
+	resize: none;
+}
+
+div.numberedtextarea-wrapper textarea {
+  display: block;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+div.numberedtextarea-line-numbers {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 50px;
+  border-right: 1px solid rgb(0, 0, 0);
+  color: rgb(0, 0, 0);
+  overflow: hidden;
+  background: rgb(232, 232, 232);
+}
+
+div.numberedtextarea-number {
+  padding-right: 6px;
+  text-align: right;
+}
+
+#codearea {
+	height: 50vh;
+}
+
+#resultarea {
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+	border: none;
+	height: 30vh;
+}
