@@ -8,6 +8,12 @@ $dbpass = 'mysql';	//...to your installation
 $connection = new mysqli($dbhost, $dbuser, $dbpass, $dbname);
 if($connection->connect_error) die("Fatal Error");
 
+function createTable($name, $query)
+{
+	queryMysql("CREATE TABLE IF NOT EXISTS $name($query)");
+	echo "Table '$name' created or already exitsts.<br>";
+}
+
 function queryMysql($query)
 {
 	global $connection;
@@ -34,12 +40,6 @@ function destroySession()
 		setcookie(session_name(), '', time()-2592000, '/');
 		
 	session_destroy();
-}
-
-function createTable($name, $query)
-{
-	queryMysql("CREATE TABLE IF NOT EXISTS $name($query)");
-	echo "Table '$name' created or already exitsts.<br>";
 }
 
 ?>
