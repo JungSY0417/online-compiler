@@ -1,6 +1,4 @@
 <?php
-session_start();
-
 $user = $_SESSION['user'];
 $subj = $_SESSION['subj'];
 

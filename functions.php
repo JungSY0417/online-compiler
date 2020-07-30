@@ -26,4 +26,20 @@ function sanitizeString($var)
 	return $connection->real_escape_string($var);
 }
 
+function destroySession()
+{
+	$_SESSION=array();
+	
+	if(session_id() != "" || isset($_COOKIE[session_name()]))
+		setcookie(session_name(), '', time()-2592000, '/');
+		
+	session_destroy();
+}
+
+function createTable($name, $query)
+{
+	queryMysql("CREATE TABLE IF NOT EXISTS $name($query)");
+	echo "Table '$name' created or already exitsts.<br>";
+}
+
 ?>

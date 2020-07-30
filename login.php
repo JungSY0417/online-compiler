@@ -1,6 +1,9 @@
 <?php
 session_start();
 
+header("Progma:no-cache");
+header("Cache-Control:no-cache,must-revalidate");
+
 require_once 'functions.php';
 
 $error = $user = $pass = $subj = "";
@@ -40,7 +43,6 @@ echo <<<_END
 		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 		<meta name='viewport' content='width=device-width, initial-scale=1'>
 		<link rel='stylesheet' href="https://ajax.googleapis.com/ajax/libs/jquerymobile/1.4.5/jquery.mobile.min.css">
-		<link rel='stylesheet' href="styles.css" type="text/css">
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 		<script src="https://ajax.googleapis.com/ajax/libs/jquerymobile/1.4.5/jquery.mobile.min.js"></script>
 		<title>Login</title>

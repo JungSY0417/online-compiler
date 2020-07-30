@@ -17,6 +17,7 @@ echo <<<_END
 		<script src='downloadcode.js'></script>
 		<script src='compiler-jQuery.js'></script>
 		<script src='linenumber.js'></script>
+		
 		<title>Online Compiler</title>
 		<script>
 			function display() {
@@ -32,81 +33,133 @@ echo <<<_END
 			}
 		</script>
 	</head>
-	
-	<body>
-		<fieldset>
-			<form id='codeform' method='post' action='compile.php'>
-				<select class='button' id='programlist' onchange="display()">
-					<option value="">Program List</option>
 _END;
 
-$j = 1;
-$sql = queryMysql("SELECT code FROM codes WHERE number='$j'");
-while($row = mysqli_fetch_array($sql)) {
-	echo "<option value='$j'>code $j</option>";
-	++$j;
+if(isset($_SESSION['user'])) {
+	echo <<<_END
+		<body>
+			<fieldset>
+				<form id='codeform' method='post' action='compile.php'>
+					<select class='button' id='programlist' onchange="display()">
+						<option value="">Program List</option>
+	_END;
+	
+	$j = 1;
 	$sql = queryMysql("SELECT code FROM codes WHERE number='$j'");
+	while($row = mysqli_fetch_array($sql)) {
+		echo "<option value='$j'>code $j</option>";
+		++$j;
+		$sql = queryMysql("SELECT code FROM codes WHERE number='$j'");
+	}
+	
+	echo <<<_END
+					</select>
+					<input class='button' type='submit' id='run' value='RUN'></input>
+					<button class='button' type='button' onclick="download()">Download Code</button>
+					<textarea id='codearea' name='codearea' spellcheck="false" autofocus></textarea>
+	
+					<legend id='inputlegend' style='display:none'>Input</legend>
+					<textarea id='inputarea' name='inputarea' spellcheck='false' style='display:none; width: 100%; height: 15vh; box-sizing: border-box;'></textarea>
+					<button type='button' id='push' style='display:none'></button>
+				</form>
+					
+				<script>
+					$('#codearea').numberedtextarea();
+					$('#codearea').allowTabChar();
+					
+					document.getElementById('inputarea').addEventListener('keydown',function(event){
+	       				if(event.keyCode == 13){
+	        				event.preventDefault();
+	            			document.getElementById('push').click();
+	        			}
+	    			});
+					
+					$(document).ready(function(){
+						$("#run").click(function(){
+							$("#resultarea").html("Loading ......");
+						});
+					});
+					
+					//wait for page load to initialize script
+					$(document).ready(function(){
+						//listen for form submission
+						$("#codeform").on('submit', function(e){
+							//prevent form from submitting and leaving page
+							e.preventDefault();
+									
+							var code = document.getElementById('codearea').value;
+							var code1 = code.replace(/\/\/(.)*/g,'');
+							code1 = code1.replace(/\/\*(.)*(\\n)*\*\//g,'');
+							
+							if(code1.indexOf('getchar') != -1 ||
+							   code1.indexOf('getche') != -1 ||
+							   code1.indexOf('getch') != -1 ||
+							   code1.indexOf('gets') != -1 ||
+							   code1.indexOf('scanf') != -1) {
+								document.getElementById('inputarea').style.display = "block";
+								document.getElementById('inputlegend').style.display = "block";
+									
+								$("#push").click(function(){
+									$.ajax({
+										type: "POST", //type of submit
+										cache: false, //important or else you might get wrong data returned to you
+										url: "compile.php", //destination
+								        datatype: "text", //expected data format from process.php
+								        data: {"codearea": code, "input": document.getElementById('inputarea').value}, //target your form's data and serialize for a POST
+								        success: function(result) { // data is the var which holds the output of your process.php
+								
+								        	// locate the div with #result and fill it with returned data from process.php
+											$('#resultarea').html(result);
+								        }
+								    });
+								})
+							}
+						
+							else {
+								document.getElementById('inputarea').style.display = "none";
+								document.getElementById('inputlegend').style.display = "none";
+								document.getElementById('inputarea').value="";
+								
+								$.ajax({
+									type: "POST", //type of submit
+									cache: false, //important or else you might get wrong data returned to you
+									url: "compile.php", //destination
+							        datatype: "text", //expected data format from process.php
+							        data: {"codearea": code}, //target your form's data and serialize for a POST
+							        success: function(result) { // data is the var which holds the output of your process.php
+							
+							                // locate the div with #result and fill it with returned data from process.php
+										$('#resultarea').html(result);
+									}
+								});
+							}
+					    });
+					});
+				</script>
+			</fieldset>
+			
+			<fieldset>
+				<textarea id='resultarea' spellcheck="false" readonly></textarea>
+			</fieldset>
+			
+			<form method='POST' action='logout.php' align='right'>
+				<input type='submit' id='exit' value='EXIT'></input>
+			</form>
+		</body>
+	</html>
+	_END;
 }
 
-echo <<<_END
-				</select>
-				<input class='button' type='submit' id='run' value='RUN'></input>
-				<button class='button' type='button' onclick="download()">Download Code</button>
-				<textarea id='codearea' name='codearea' spellcheck="false" autofocus></textarea>
-			</form>
+else {
+	echo <<<_END
+		<body>
 			<script>
-				$('#codearea').numberedtextarea();
-				$('#codearea').allowTabChar();
-				
-				$(document).ready(function(){
-					$("#run").click(function(){
-						$("#resultarea").html("Loading ......");
-					});
-				});
-				
-				//wait for page load to initialize script
-				$(document).ready(function(){
-					//listen for form submission
-					$("#codeform").on('submit', function(e){
-						//prevent form from submitting and leaving page
-						e.preventDefault();
-						
-						var code = document.getElementById('codearea').value;
-						if(code.indexOf('getchar') != -1 ||
-						   code.indexOf('getche') != -1 ||
-						   code.indexOf('getch') != -1 ||
-						   code.indexOf('gets') != -1 ||
-						   code.indexOf('scanf') != -1) {
-							var input=prompt("Put value for input function.");
-						}
-								
-						// AJAX 
-						$.ajax({
-							type: "POST", //type of submit
-							cache: false, //important or else you might get wrong data returned to you
-							url: "compile.php", //destination
-				            datatype: "text", //expected data format from process.php
-				            data: {"codearea": code, "input": input}, //target your form's data and serialize for a POST
-				            success: function(result) { // data is the var which holds the output of your process.php
-				
-				                // locate the div with #result and fill it with returned data from process.php
-								$('#resultarea').html(result);
-				            }
-				        });
-				    });
-				});
+				alert('Please log in to use this page.');
+				location.href='login.php';
 			</script>
-		</fieldset>
-		
-		<fieldset>
-			<textarea id='resultarea' spellcheck="false"></textarea>
-		</fieldset>
-		
-		<form method='post' action='login.php' align='right'>
-			<input type='submit' id='exit' value='EXIT'></input>
-		</form>
-	</body>
-</html>
-_END;
+		</body>
+	</html>
+	_END;
+}
 
 ?>

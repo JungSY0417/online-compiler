@@ -61,9 +61,9 @@
 	{
 		echo "$error";
 	}
-	exec("del $filename_code");
+	exec("del main.c");
 	exec("del *.o");
 	exec("del *.txt");
-	exec("del $executable");
-	
+	exec("del main.exe");
+
 ?>

@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Setting up database</title>
+	</head>
+	<body>
+	
+		<h3>Setting up...</h3>
+	
+<?php
+	require_once 'functions.php';
+	
+	createTable('user', 'ID VARCHAR(10), password VARCHAR(128), name varchar(128), subject varchar(128),
+				email varchar(128), year varchar(4), semester varchar(5), PRIMARY KEY(ID)');
+	
+	createTable('codes', 'ID VARCHAR(10), subject VARCHAR(128), code longtext, number int(11),
+				year varchar(4), semester varchar(5), PRIMARY KEY(number)');
+?>
+
+		<br>...done.
+	</body>
+</html>
