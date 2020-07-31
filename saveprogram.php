@@ -11,7 +11,9 @@ if(isset($_POST['codearea']))
 {
 	global $same;
 	$text = $_POST['codearea'];
-	$text = str_replace("\\n", "\\\\n", $text);
+	$text = str_replace("\\", "\\\\", $text);
+	$text = str_replace("'", "\'", $text);
+	
 	$sql = queryMysql("SELECT code FROM codes");
 	while($row = mysqli_fetch_array($sql)) {
 		$result = (string)$row[0];
