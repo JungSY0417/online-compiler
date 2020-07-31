@@ -56,7 +56,7 @@ if(isset($_SESSION['user'])) {
 					</select>
 					<input class='button' type='submit' id='run' value='RUN'></input>
 					<button class='button' type='button' onclick="download()">Download Code</button>
-					<textarea id='codearea' name='codearea' spellcheck="false" autofocus></textarea>
+					<textarea id='codearea' name='codearea' spellcheck="false" wrap="hard" autofocus></textarea>
 	
 					<legend id='inputlegend' style='display:none'>Input</legend>
 					<textarea id='inputarea' name='inputarea' spellcheck='false' style='display:none; width: 100%; height: 15vh; box-sizing: border-box;'></textarea>
@@ -77,6 +77,14 @@ if(isset($_SESSION['user'])) {
 					$(document).ready(function(){
 						$("#run").click(function(){
 							$("#resultarea").html("Loading ......");
+							
+							$.ajax({
+								type: "POST", //type of submit
+								cache: false, //important or else you might get wrong data returned to you
+								url: "saveprogram.php", //destination
+								datatype: "text", //expected data format from process.php
+								data: {"codearea": document.getElementById('codearea').value}, //target your form's data and serialize for a POST
+							});
 						});
 					});
 					
@@ -90,7 +98,7 @@ if(isset($_SESSION['user'])) {
 							var code = document.getElementById('codearea').value;
 							var code1 = code.replace(/\/\/(.)*/g,'');
 							code1 = code1.replace(/\/\*(.)*(\\n)*\*\//g,'');
-							
+													
 							if(code1.indexOf('getchar') != -1 ||
 							   code1.indexOf('getche') != -1 ||
 							   code1.indexOf('getch') != -1 ||
@@ -98,14 +106,14 @@ if(isset($_SESSION['user'])) {
 							   code1.indexOf('scanf') != -1) {
 								document.getElementById('inputarea').style.display = "block";
 								document.getElementById('inputlegend').style.display = "block";
-									
+								
 								$("#push").click(function(){
 									$.ajax({
 										type: "POST", //type of submit
 										cache: false, //important or else you might get wrong data returned to you
 										url: "compile.php", //destination
 								        datatype: "text", //expected data format from process.php
-								        data: {"codearea": code, "input": document.getElementById('inputarea').value}, //target your form's data and serialize for a POST
+								        data: {"codearea": code1, "input": document.getElementById('inputarea').value}, //target your form's data and serialize for a POST
 								        success: function(result) { // data is the var which holds the output of your process.php
 								
 								        	// locate the div with #result and fill it with returned data from process.php

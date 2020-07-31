@@ -40,7 +40,6 @@
 			$output=shell_exec($out);
 		}
 		echo "$output";
-        //echo "<textarea id='div' class=\"form-control\" name=\"output\" rows=\"10\" cols=\"50\">$output</textarea><br><br>";
 	}
 	else if(!strpos($error,"error"))
 	{
@@ -55,7 +54,6 @@
 			$output=shell_exec($out);
 		}
 		echo "$output";
-        //echo "<textarea id='div' class=\"form-control\" name=\"output\" rows=\"10\" cols=\"50\">$output</textarea><br><br>";
 	}
 	else
 	{
