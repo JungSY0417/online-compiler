@@ -1,12 +1,20 @@
 <?php
+session_start();
+
+$user = $_SESSION['user'];
+$subj = $_SESSION['subj'];
 
 require_once 'functions.php';
 
-if(isset($_POST['code']))
+if(isset($_POST['n']))
 {
-	$num = (int)$_POST['code'];
-	$sql = queryMysql("SELECT code FROM codes WHERE number=$num");
-	$row = $sql->fetch_row();
+	$num = (int)$_POST['n'];
+	$sql = queryMysql("SELECT code FROM codes WHERE ID='$user' AND subject='$subj'");
+	$i = 0;
+	while($i < $num) {
+		$row = mysqli_fetch_array($sql);
+		$i++;
+	}
 	$result = (string)$row[0];
 	echo $result;
 }

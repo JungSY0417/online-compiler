@@ -6,8 +6,10 @@
 	$filename="main";
 	$code=$_POST["codearea"];
 	$input=$_POST["input"];
+	$runtime_argument=$_POST["rtarg"];
 	$filename_code="main.c";
 	$filename_in="input.txt";
+	$filename_arg="argument.txt";
 	$filename_error="error.txt";
 	$executable="main.exe";
 	$command=$CC." -o ".$filename." ".$filename_code;
@@ -30,8 +32,13 @@
 
 	if(trim($error)=="")
 	{
-		if(trim($input)=="")
+		if(trim($input)=="" && trim($runtime_argument) == "")
 		{
+			$output=shell_exec($out);
+		}
+		else if(trim($runtime_argument) != "")
+		{
+			$out = $out." ".$runtime_argument;
 			$output=shell_exec($out);
 		}
 		else
@@ -44,8 +51,13 @@
 	else if(!strpos($error,"error"))
 	{
 		echo "$error";
-		if(trim($input)=="")
+		if(trim($input)=="" && trim($runtime_argument) == "")
 		{
+			$output=shell_exec($out);
+		}
+		else if(trim($runtime_argument) != "")
+		{
+			$out = $out." ".$runtime_argument;
 			$output=shell_exec($out);
 		}
 		else

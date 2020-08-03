@@ -1,6 +1,9 @@
 <?php
 session_start();
 
+$user = $_SESSION['user'];
+$subj = $_SESSION['subj'];
+
 require_once 'functions.php';
 
 echo <<<_END
@@ -21,11 +24,11 @@ echo <<<_END
 		<title>Online Compiler</title>
 		<script>
 			function display() {
-				var code = $('#programlist').val();
+				var n = $('#programlist').val();
 				$.ajax({
 					type: 'POST',
 					url: "programlist.php",
-					data: {code:code},
+					data: {"n":n},
 					success: function(result) {
 						$('#codearea').html(result);
 					}
@@ -45,18 +48,17 @@ if(isset($_SESSION['user'])) {
 	_END;
 	
 	$j = 1;
-	$sql = queryMysql("SELECT code FROM codes WHERE number='$j'");
+	$sql = queryMysql("SELECT code FROM codes WHERE ID='$user' AND subject='$subj'");
 	while($row = mysqli_fetch_array($sql)) {
 		echo "<option value='$j'>code $j</option>";
 		++$j;
-		$sql = queryMysql("SELECT code FROM codes WHERE number='$j'");
 	}
 	
 	echo <<<_END
 					</select>
 					<input class='button' type='submit' id='run' value='RUN'></input>
 					<button class='button' type='button' onclick="download()">Download Code</button>
-					<textarea id='codearea' name='codearea' spellcheck="false" wrap="hard" autofocus></textarea>
+					<textarea id='codearea' name='codearea' spellcheck="false" autofocus></textarea>
 	
 					<legend id='inputlegend' style='display:none'>Input</legend>
 					<textarea id='inputarea' name='inputarea' spellcheck='false' style='display:none; width: 100%; height: 15vh; box-sizing: border-box;'></textarea>
@@ -79,11 +81,9 @@ if(isset($_SESSION['user'])) {
 							$("#resultarea").html("Loading ......");
 							
 							$.ajax({
-								type: "POST", //type of submit
-								cache: false, //important or else you might get wrong data returned to you
-								url: "saveprogram.php", //destination
-								datatype: "text", //expected data format from process.php
-								data: {"codearea": document.getElementById('codearea').value}, //target your form's data and serialize for a POST
+								type: "POST",
+								url: "saveprogram.php",
+								data: {"codearea": document.getElementById('codearea').value},
 							});
 						});
 					});
@@ -106,6 +106,7 @@ if(isset($_SESSION['user'])) {
 							   code1.indexOf('scanf') != -1) {
 								document.getElementById('inputarea').style.display = "block";
 								document.getElementById('inputlegend').style.display = "block";
+								document.getElementById('inputarea').focus();
 								
 								$("#push").click(function(){
 									$.ajax({
@@ -123,6 +124,25 @@ if(isset($_SESSION['user'])) {
 								})
 							}
 						
+							else if(code1.indexOf('argc') != -1) {
+								document.getElementById('inputarea').style.display = "block";
+								document.getElementById('inputlegend').style.display = "block";
+								
+								$("#push").click(function(){
+									$.ajax({
+										type: "POST", //type of submit
+										cache: false, //important or else you might get wrong data returned to you
+										url: "compile.php", //destination
+								        datatype: "text", //expected data format from process.php
+								        data: {"codearea": code1, "rtarg": document.getElementById('inputarea').value}, //target your form's data and serialize for a POST
+								        success: function(result) { // data is the var which holds the output of your process.php
+								
+								        	// locate the div with #result and fill it with returned data from process.php
+											$('#resultarea').html(result);
+								        }
+								    });
+								})
+							}
 							else {
 								document.getElementById('inputarea').style.display = "none";
 								document.getElementById('inputlegend').style.display = "none";
