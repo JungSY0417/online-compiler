@@ -196,6 +196,7 @@ echo <<<_END
 				position: absolute;
 				height: 85vh;
 				border-right: 0.7px solid;
+				background: rgb(25, 0, 130);
 			}
 			
 			#logout {
@@ -219,11 +220,13 @@ echo <<<_END
 			}
 			
 			.expr {
-				margin: 40px 5px 0px 0px;
+				margin: 40px 5px 0px 5px;
+				border-radius: 6px;
 			}
 			
 			.exit {
-				margin-left: 40px;
+				margin-left: 45px;
+				border-radius: 6px;s
 			}
 			
 			label {
