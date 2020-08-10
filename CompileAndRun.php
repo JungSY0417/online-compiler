@@ -34,6 +34,18 @@ echo <<<_END
 					}
 				})
 			}
+			
+			function showex() {
+				var n = $('#exampleprog').val();
+				$.ajax({
+					type: 'POST',
+					url: "showexample.php",
+					data: {"n":n},
+					success: function(result) {
+						$('#codearea').html(result);
+					}
+				})
+			}
 		</script>
 	</head>
 _END;
@@ -43,6 +55,19 @@ if(isset($_SESSION['user'])) {
 		<body>
 			<fieldset>
 				<form id='codeform' method='post' action='compile.php'>
+					<select class='button' id='exampleprog' onchange="showex()">
+						<option value="">Example Programs</option>
+	_END;
+	
+	$j = 1;
+	$sql = queryMysql("SELECT code FROM codes WHERE ID='admin' AND subject='$subj'");
+	while($row = mysqli_fetch_array($sql)) {
+		echo "<option value='$j'>Example $j</option>";
+		++$j;
+	}
+	
+	echo <<<_END
+					</select>
 					<select class='button' id='programlist' onchange="display()">
 						<option value="">Program List</option>
 	_END;

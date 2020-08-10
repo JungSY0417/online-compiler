@@ -30,7 +30,10 @@ if(isset($_POST['user']))
 			$_SESSION['user'] = $user;
 			$_SESSION['pass'] = $pass;
 			$_SESSION['subj'] = $subj;
-			die("<script>location.href='CompileAndRun.php';</script>");
+			if($user == "admin")
+				die("<script>location.href='uploaduser.php';</script>");	
+			else
+				die("<script>location.href='CompileAndRun.php';</script>");
 		}
 	}
 }
