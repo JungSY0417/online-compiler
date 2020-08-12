@@ -16,7 +16,7 @@
 	createTable('codes', 'ID VARCHAR(10), subject VARCHAR(128), code longtext, number int(11),
 				year VARCHAR(4), semester VARCHAR(5), PRIMARY KEY(number)');
 				
-	queryMysql("INSERT INTO user VALUES('admin', '12345', 'administer', 'admin', 'sdjdr87@gmail.com', '2020', 'sum')");
+	queryMysql("INSERT INTO user VALUES('admin', '12345', 'administer', 'admin', NULL, NULL, NULL)");
 ?>
 
 		<br>...done.

@@ -1,12 +1,10 @@
 <?php
-session_start();
+require_once 'functions.php';
 
 header("Progma:no-cache");
 header("Cache-Control:no-cache,must-revalidate");
 
-require_once 'functions.php';
-
-$error = $user = $pass = $subj = "";
+$error = $ID = $name = $pw = $npw = "";
 $year = date("Y");
 $mon = date("n");
 
@@ -31,18 +29,21 @@ else if($mon == 12) {
 		$sem = 'win';
 }
 
-if(isset($_POST['user']))
+if(isset($_POST['ID']))
 {
-	$user = sanitizeString($_POST['user']);
-	$pass = sanitizeString($_POST['pass']);
-	$subj = sanitizeString($_POST['subj']);
+	$ID = sanitizeString($_POST['ID']);
+	$name = sanitizeString($_POST['name']);
+	$pw = sanitizeString($_POST['pw']);
+	$npw = sanitizeString($_POST['npw']);
 	
-	if($user == "" || $pass == "" || $subj == "")
+	if($ID == "" || $name == "" || $pw == "" || $npw == "")
 		$error = 'Not all fields were entered';
+	else if($pw == $npw)
+		$error = '이전에 사용하던 비밀번호는 사용하실 수 없습니다';
 	else
 	{
-		$result = queryMysql("SELECT ID, password, subject FROM user
-			WHERE ID='$user' AND password='$pass' AND subject='$subj' AND year='$year' AND semester='$sem'");
+		$result = queryMysql("SELECT ID, name, password FROM user
+			WHERE ID='$ID' AND name='$name' AND password='$pw' AND year='$year' AND semester='$sem'");
 			
 		if($result->num_rows == 0)
 		{
@@ -50,13 +51,9 @@ if(isset($_POST['user']))
 		}
 		else
 		{
-			$_SESSION['user'] = $user;
-			$_SESSION['pass'] = $pass;
-			$_SESSION['subj'] = $subj;
-			if($user == "admin")
-				die("<script>location.href='uploaduser.php';</script>");	
-			else
-				die("<script>location.href='CompileAndRun.php';</script>");
+			$result = queryMysql("UPDATE user SET password='$npw'
+				WHERE ID='$ID' AND name='$name' AND password='$pw' AND year='$year' AND semester='$sem'");
+			$msg = "<br><br>비밀번호 변경 완료";
 		}
 	}
 }
@@ -71,9 +68,9 @@ echo <<<_END
 		<link rel='stylesheet' href="https://ajax.googleapis.com/ajax/libs/jquerymobile/1.4.5/jquery.mobile.min.css">
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 		<script src="https://ajax.googleapis.com/ajax/libs/jquerymobile/1.4.5/jquery.mobile.min.js"></script>
-		<title>Login</title>
+		<title>Change Password</title>
 		<style>
-			#logindiv {
+			#changediv {
 				padding: 5px 20px;
 				position: absolute;
 				top: 50%;
@@ -84,16 +81,16 @@ echo <<<_END
 				margin-top: -170px;
 				
 				display: flex;
-					flex-direction: column;
-					justify-content: center;
-					align-items: center;
+				flex-direction: column;
+				justify-content: center;
+				align-items: center;
 			}
 			
-			.loginform {
+			.changeform {
 				width: 300px;
 			}
 			
-			.loginform > div {
+			.changeform > div {
 				display: flex;
 				justify-content: center;
 				padding-bottom: 7px;
@@ -104,12 +101,13 @@ echo <<<_END
 				color: red;
 			}
 			
-			label {
-				flex: 1;
-				text-align: left;
+			.msg {
+				position: absolute;
+				left: 45%;
+				top: 70vh;
 			}
 			
-			a {
+			label, a {
 				flex: 1;
 				text-align: left;
 			}
@@ -119,33 +117,36 @@ echo <<<_END
 			}
 		</style>
 	</head>
-	
 	<body>
-		<div id='logindiv'>
-		<img src="logo.png">
-			<form class='loginform' method='post' action='login.php'>
-				<div id='cell'>
-					<label></label>
+		<div id='changediv'>
+			<h2><U>Change Password</U></h2><br><br>
+			<form class='changeform' action="changepw.php" method="post">
+				<div>
 					<span class='error'>$error</span>
 				</div>
-				<div id='cell'>
-					<label>Student ID</label>
-					<input type='text' maxlength='16' name='user' value='$user'>
-				</div>
-				<div id='cell'>
-					<label>Password</label>
-					<input type='password' maxlength='16' name='pass' value='$pass'>
-				</div>
-				<div id='cell'>
-					<label>Subject</label>
-					<input type='text' maxlength='20' name='subj' value='$subj'>
+				<div>
+					<label>학번</label>
+					<input type="text" name="ID" id="ID"></input>
 				</div>
 				<div>
-					<a data-transition='slide' href='changepw.php'>비밀번호 변경</a>
-					<input data-transition='slide' type='submit' value='Login'>
+					<label>이름</label>
+					<input type="text" name="name" id="name"></input>
+				</div>
+				<div>
+					<label>현재 비밀번호</label>
+					<input type="password" name="pw" id="pw"></input>
+				</div>
+				<div>
+					<label>새 비밀번호</label>
+					<input type="password" name="npw" id="npw"></input>
+				</div>
+				<div>
+					<a data-transition='slide' href='login.php'>로그인</a>
+					<input data-transition='slide' type='submit'>
 				</div>
 			</form>
 		</div>
+		<div class='msg'>$msg</div>
 	</body>
 </html>
 _END;

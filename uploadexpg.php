@@ -2,6 +2,29 @@
 session_start();
 
 $user = $_SESSION['user'];
+$year = date("Y");
+$mon = date("n");
+
+if($mon == 1 || $mon == 2)
+	$sem = 'win';
+else if($mon == 3 || $mon == 4 || $mon == 5)
+	$sem = 1;
+else if($mon == 7 || $mon == 8)
+	$sem = 'sum';
+else if($mon == 9 || $mon == 10 || $mon == 11)
+	$sem = 2;
+else if($mon == 6) {
+	if(date("j") <= 15)
+		$sem = 1;
+	else if(date("j") > 15)
+		$sem = 'sum';
+}
+else if($mon == 12) {
+	if(date("j") <= 15)
+		$sem = 2;
+	else if(date("j") > 15)
+		$sem = 'win';
+}
 
 require_once "functions.php";
 
@@ -70,7 +93,7 @@ if(isset($_FILES['file']) && isset($_POST['subj'])) {
 			
 			//이미 있는 프로그램인지 검사
 			$same = 0;
-			$sql = queryMysql("SELECT code FROM codes WHERE ID='$user' AND subject='$subj'");
+			$sql = queryMysql("SELECT code FROM codes WHERE ID='$user' AND subject='$subj' AND year='$year' AND semester='$sem'");
 			while($row = mysqli_fetch_array($sql)) {
 				$result = (string)$row[0];
 				if($result == $code)
@@ -80,7 +103,7 @@ if(isset($_FILES['file']) && isset($_POST['subj'])) {
 			if($same != 1) {
 				$code = str_replace("\\", "\\\\", $code);
 				$code = str_replace("'", "\'", $code);
-				$result = queryMysql("INSERT INTO codes VALUES('$user', '$subj', '$code', '2020', 'sum')");
+				$result = queryMysql("INSERT INTO codes VALUES('$user', '$subj', '$code', '$year', '$sem')");
 				$msg = "프로그램 업로딩 성공";
 			}
 			else {
