@@ -6,6 +6,29 @@ require_once "functions.php";
 setlocale(LC_CTYPE, 'ko_KR.eucKR'); //CSV데이타 추출시 한글깨짐방지
 
 $error = $success = $msg = "";
+$year = date("Y");
+$mon = date("n");
+
+if($mon == 1 || $mon == 2)
+	$sem = 'win';
+else if($mon == 3 || $mon == 4 || $mon == 5)
+	$sem = 1;
+else if($mon == 7 || $mon == 8)
+	$sem = 'sum';
+else if($mon == 9 || $mon == 10 || $mon == 11)
+	$sem = 2;
+else if($mon == 6) {
+	if(date("j") <= 15)
+		$sem = 1;
+	else if(date("j") > 15)
+		$sem = 'sum';
+}
+else if($mon == 12) {
+	if(date("j") <= 15)
+		$sem = 2;
+	else if(date("j") > 15)
+		$sem = 'win';
+}
 
 function getExt($filename){
 	$ext = substr(strrchr($filename,"."),1);
@@ -61,7 +84,7 @@ function DataDeleteChk($filename) {
 	return $delcount;
 }
 			
-if(isset($_FILES['file'])) {
+if($_FILES['file']['name'] != "") {
 
     //if there was an error uploading the file
     if($_FILES["file"]["error"] > 0) {
@@ -109,40 +132,32 @@ if(isset($_FILES['file'])) {
 			    // 파일 인코딩 모드 검사
 			    if($current_encoding != 'utf-8') {
 			        $line00 = iconv('euc-kr','utf-8',trim($line[0])); // ID
-			        $line01 = iconv('euc-kr','utf-8',trim($line[1])); // password
-			        $line02 = iconv('euc-kr','utf-8',trim($line[2])); // name
-			        $line03 = iconv('euc-kr','utf-8',trim($line[3])); // subject
-			    	$line04 = iconv('euc-kr','utf-8',trim($line[4])); // email
-					$line05 = iconv('euc-kr','utf-8',trim($line[5])); // year
-					$line06 = iconv('euc-kr','utf-8',trim($line[6])); // semester
+			        $line01 = iconv('euc-kr','utf-8',trim($line[1])); // name
+			        $line02 = iconv('euc-kr','utf-8',trim($line[2])); // subject
+			        $line03 = iconv('euc-kr','utf-8',trim($line[3])); // email
 				} else {
 			        $line00 = trim($line[0]); // ID
-			        $line01 = trim($line[1]); // password
-			        $line02 = trim($line[2]); // name
-			        $line03 = trim($line[3]); // subject
-					$line04 = trim($line[4]); // email
-					$line05 = trim($line[5]); // year
-					$line06 = trim($line[6]); // semester
+			        $line01 = trim($line[1]); // name
+			        $line02 = trim($line[2]); // subject
+			        $line03 = trim($line[3]); // email
 			    }
 			
 			    $ID = $line00;
-			    $password = $line01;
-			    $name = $line02;
-			    $subject = $line03;
-				$email = $line04;
-			    $year = $line05;
-				$semester = $line06;
+			    $name = $line01;
+			    $subject = $line02;
+				$email = $line03;
 				
 			    $total_line++;
 			
 			    // 중복 등록 여부 검사
 			    $cnt = DataExistedChk($ID);
 			    if($cnt == "0"){
-			        $result = queryMysql("INSERT INTO user VALUES('$ID', '$password', '$name', '$subject', '$email', '$year', '$semester')");
+			        $result = queryMysql("INSERT INTO user VALUES('$ID', '$ID', '$name', '$subject', '$email', '$year', '$sem')");
 			        $newcount++;
 			    }
 				else {
-					$result = queryMysql("UPDATE user SET password='$password', name='$name', email='$email' WHERE ID='$ID'");
+					$result = queryMysql("UPDATE user SET name='$name', email='$email'
+											WHERE ID='$ID' AND subject='$subject' AND year='$year' AND semester='$sem'");
 				}
 				
 			    $ok++;
@@ -216,11 +231,32 @@ echo <<<_END
 			}
 			
 			.error {
+				position: absolute;
+				left: 25%;
+				top: 5vh;
 				color: red;
+			}
+			
+			.success {
+				position: absolute;
+				left: 25%;
+				top: 0vh;
+			}
+			
+			.msg {
+				position: absolute;
+				left: 20%;
+				top: 25vh;
 			}
 			
 			.expr {
 				margin: 40px 5px 0px 5px;
+				border-radius: 6px;
+			}
+			
+			.rspw {
+				position: absolute;
+				margin: 100px 5px 0px 20px;
 				border-radius: 6px;
 			}
 			
@@ -237,19 +273,15 @@ echo <<<_END
 	</head>
 _END;
 
-if(isset($_SESSION['user'])) {
+if($_SESSION['user'] == 'admin') {
 	echo <<<_END
 		<body>
 			<h2 align='center'>Upload Students</h2>
 			<hr size='1' noshade></hr>
 			<div id='uploaddiv'>
+				<div class='error'>$error</div>
+				<div class='success'>$success</div>
 				<form class='uploadform' action="uploaduser.php" method="post" enctype='multipart/form-data'>
-					<div>
-						<span class='error'>$error</span>
-					</div>
-					<div>
-						<span>$success</span>
-					</div>
 					<div>
 						<label>파일선택</label>
 						<input type="file" name="file" id="file"></input>
@@ -259,14 +291,16 @@ if(isset($_SESSION['user'])) {
 						<br><br>
 						<input data-transition='slide' type='submit'>
 					</div>
-					<div>
-						<span>$msg</span>
-					</div>
 				</form>
+				<div class='msg'>$msg</div>
 			</div>
 			
 			<form id='exprogram' method='POST' action='uploadexpg.php'>
 				<input class='expr' type='submit' value='예제프로그램 업로드'></input>
+			</form>
+			
+			<form id='resetpw' method='POST' action='resetpw.php'>
+				<input class='rspw' type='submit' value='비밀번호 초기화'></input>
 			</form>
 			
 			<form id='logout' method='POST' action='logout.php' align='right'>
@@ -280,7 +314,7 @@ else {
 	echo <<<_END
 		<body>
 			<script>
-				alert('Please log in to use this page.');
+				alert('Please log in as administer to use this page.');
 				location.href='login.php';
 			</script>
 		</body>

@@ -103,13 +103,19 @@ echo <<<_END
 			
 			.msg {
 				position: absolute;
-				left: 45%;
-				top: 70vh;
+				left: 40%;
+				top: 45vh;
 			}
 			
-			label, a {
+			label {
 				flex: 1;
 				text-align: left;
+			}
+			
+			a {
+				flex: 1;
+				text-align: left;
+				text-decoration:none;
 			}
 			
 			input {
@@ -145,8 +151,8 @@ echo <<<_END
 					<input data-transition='slide' type='submit'>
 				</div>
 			</form>
+			<div class='msg'>$msg</div>
 		</div>
-		<div class='msg'>$msg</div>
 	</body>
 </html>
 _END;

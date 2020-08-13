@@ -41,8 +41,13 @@ if(isset($_POST['user']))
 		$error = 'Not all fields were entered';
 	else
 	{
-		$result = queryMysql("SELECT ID, password, subject FROM user
-			WHERE ID='$user' AND password='$pass' AND subject='$subj' AND year='$year' AND semester='$sem'");
+		if($user == 'admin')
+			$result = queryMysql("SELECT ID, password, subject FROM user
+				WHERE ID='$user' AND password='$pass' AND subject='$subj'");
+
+		else
+			$result = queryMysql("SELECT ID, password, subject FROM user
+				WHERE ID='$user' AND password='$pass' AND subject='$subj' AND year='$year' AND semester='$sem'");
 			
 		if($result->num_rows == 0)
 		{
@@ -53,6 +58,11 @@ if(isset($_POST['user']))
 			$_SESSION['user'] = $user;
 			$_SESSION['pass'] = $pass;
 			$_SESSION['subj'] = $subj;
+			
+			$now = new DateTime();
+			$_SESSION['start'] = $now->format('Y-m-d H:i:s');
+			$_SESSION['IP'] = $_SERVER['REMOTE_ADDR'];
+			
 			if($user == "admin")
 				die("<script>location.href='uploaduser.php';</script>");	
 			else
@@ -112,6 +122,7 @@ echo <<<_END
 			a {
 				flex: 1;
 				text-align: left;
+				text-decoration:none;
 			}
 			
 			input {

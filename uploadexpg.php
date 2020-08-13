@@ -1,7 +1,10 @@
 <?php
 session_start();
 
+require_once "functions.php";
+
 $user = $_SESSION['user'];
+$subj = sanitizeString($_POST['subj']);
 $year = date("Y");
 $mon = date("n");
 
@@ -26,8 +29,6 @@ else if($mon == 12) {
 		$sem = 'win';
 }
 
-require_once "functions.php";
-
 setlocale(LC_CTYPE, 'ko_KR.eucKR'); //CSV데이타 추출시 한글깨짐방지
 
 $error = $success = $msg = "";
@@ -49,69 +50,74 @@ function detectFileEncoding($filepath) {
 	return null;
 }
 
-if(isset($_FILES['file']) && isset($_POST['subj'])) {
+if($_FILES['file']['name'] != "") {
 
-    //if there was an error uploading the file
-    if($_FILES["file"]["error"] > 0) {
-        $error = "Return Code: " . $_FILES["file"]["error"] . "<br>";
-    }
-    else {
-        //Print file details
-        $success = "Uploaded File Name: " . $_FILES["file"]["name"] . "<br><br>";
-		
-    	// Edit upload location here
-		$tmpname = $_FILES['file']['tmp_name'];
-		$realname = $_FILES['file']['name'];
-		$subj = $_POST['subj'];
-		
-		$fileExt = getExt($realname);
-		if (!strstr('[c]',$fileExt)) {
-		    $error = "c 파일만 등록할 수 있습니다.<br>";
-		}
-		else {
-			$readFile = "example.c";
+	if($subj == "") {
+		$error = "과목명을 입력해주세요";
+	}
+	else {
+	    //if there was an error uploading the file
+	    if($_FILES["file"]["error"] > 0) {
+	        $error = "Return Code: " . $_FILES["file"]["error"] . "<br>";
+	    }
+	    else {
+	        //Print file details
+	        $success = "Uploaded File Name: " . $_FILES["file"]["name"] . "<br><br>";
 			
-			$errorFile ="errorFile.txt"; 
+	    	// Edit upload location here
+			$tmpname = $_FILES['file']['tmp_name'];
+			$realname = $_FILES['file']['name'];
+			$subj = $_POST['subj'];
 			
-			$TABLENAME ='user'; // 테이블명
-			
-			if (is_uploaded_file($tmpname)) {
-	
-			    move_uploaded_file($tmpname,$readFile);
-			    @chmod($readFile,0606);
-			}
-			
-			$file_read = fopen($readFile,"r");
-			if(!$file_read){
-			    $error = "파일을 찾을 수가 없습니다!<br>";
-			}
-			
-			// 파일 인코딩 모드 검사
-			$current_encoding = detectFileEncoding($readFile);
-			
-			$code = fread($file_read,filesize("example.c"));
-			
-			//이미 있는 프로그램인지 검사
-			$same = 0;
-			$sql = queryMysql("SELECT code FROM codes WHERE ID='$user' AND subject='$subj' AND year='$year' AND semester='$sem'");
-			while($row = mysqli_fetch_array($sql)) {
-				$result = (string)$row[0];
-				if($result == $code)
-					$same = 1;
-			}
-		
-			if($same != 1) {
-				$code = str_replace("\\", "\\\\", $code);
-				$code = str_replace("'", "\'", $code);
-				$result = queryMysql("INSERT INTO codes VALUES('$user', '$subj', '$code', '$year', '$sem')");
-				$msg = "프로그램 업로딩 성공";
+			$fileExt = getExt($realname);
+			if (!strstr('[c]',$fileExt)) {
+			    $error = "c 파일만 등록할 수 있습니다.<br>";
 			}
 			else {
-				$msg = "이미 있는 프로그램입니다.";
-			}
+				$readFile = "example.c";
+				
+				$errorFile ="errorFile.txt"; 
+				
+				$TABLENAME ='user'; // 테이블명
+				
+				if (is_uploaded_file($tmpname)) {
+		
+				    move_uploaded_file($tmpname,$readFile);
+				    @chmod($readFile,0606);
+				}
+				
+				$file_read = fopen($readFile,"r");
+				if(!$file_read){
+				    $error = "파일을 찾을 수가 없습니다!<br>";
+				}
+				
+				// 파일 인코딩 모드 검사
+				$current_encoding = detectFileEncoding($readFile);
+				
+				$code = fread($file_read,filesize("example.c"));
+				
+				//이미 있는 프로그램인지 검사
+				$same = 0;
+				$sql = queryMysql("SELECT code FROM codes WHERE ID='$user' AND subject='$subj' AND year='$year' AND semester='$sem'");
+				while($row = mysqli_fetch_array($sql)) {
+					$result = (string)$row[0];
+					if($result == $code)
+						$same = 1;
+				}
 			
-			fclose($file_read);
-			unlink($readFile);  // 업로드 완료후에 파일 삭제 처리
+				if($same != 1) {
+					$code = str_replace("\\", "\\\\", $code);
+					$code = str_replace("'", "\'", $code);
+					$result = queryMysql("INSERT INTO codes VALUES('$user', '$subj', '$code', '$year', '$sem')");
+					$msg = "프로그램 업로딩 성공";
+				}
+				else {
+					$msg = "이미 있는 프로그램입니다.";
+				}
+				
+				fclose($file_read);
+				unlink($readFile);  // 업로드 완료후에 파일 삭제 처리
+			}
 		}
 	}
 }
@@ -176,12 +182,33 @@ echo <<<_END
 			}
 			
 			.error {
+				position: absolute;
+				left: 35%;
+				top: 5vh;
 				color: red;
+			}
+			
+			.success {
+				position: absolute;
+				left: 25%;
+				top: 0vh;
 			}
 			
 			.std {
 				margin: 40px 20px 0px 15px;
 				border-radius: 6px;
+			}
+			
+			.rspw {
+				position: absolute;
+				margin: 100px 5px 0px 15px;
+				border-radius: 6px;
+			}
+			
+			.msg {
+				position: absolute;
+				left: 30%;
+				top: 35vh;
 			}
 			
 			.exit {
@@ -197,19 +224,15 @@ echo <<<_END
 	</head>
 _END;
 	
-if(isset($_SESSION['user'])) {
+if($_SESSION['user'] == 'admin') {
 	echo <<<_END
 		<body>
 			<h2 align='center'>Upload Example Programs</h2>
 			<hr size='1' noshade></hr>
 			<div id='uploaddiv'>
+				<div class='error'>$error</div>
+				<div class='success'>$success</div>
 				<form class='uploadform' action="uploadexpg.php" method="post" enctype='multipart/form-data'>
-					<div>
-						<span class='error'>$error</span>
-					</div>
-					<div>
-						<span>$success</span>
-					</div>
 					<div>
 						<label>예제 프로그램 선택</label>
 						<input type="file" name="file" id="file"></input>
@@ -223,14 +246,16 @@ if(isset($_SESSION['user'])) {
 						<br><br>
 						<input data-transition='slide' type='submit'>
 					</div>
-					<div>
-						<span>$msg</span>
-					</div>
 				</form>
+				<div class='msg'>$msg</div>
 			</div>
 			
 			<form id='uploadstd' method='POST' action='uploaduser.php'>
 				<input class='std' type='submit' value='학생 정보 업로드'></input>
+			</form>
+			
+			<form id='resetpw' method='POST' action='resetpw.php'>
+				<input class='rspw' type='submit' value='비밀번호 초기화'></input>
 			</form>
 			
 			<form id='logout' method='POST' action='logout.php' align='right'>
@@ -244,7 +269,7 @@ else {
 	echo <<<_END
 		<body>
 			<script>
-				alert('Please log in to use this page.');
+				alert('Please log in as administer to use this page.');
 				location.href='login.php';
 			</script>
 		</body>
