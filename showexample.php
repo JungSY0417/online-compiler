@@ -1,32 +1,11 @@
 <?php
 session_start();
 
+require_once 'functions.php';
+
 $subj = $_SESSION['subj'];
 $year = date("Y");
-$mon = date("n");
-
-if($mon == 1 || $mon == 2)
-	$sem = 'win';
-else if($mon == 3 || $mon == 4 || $mon == 5)
-	$sem = 1;
-else if($mon == 7 || $mon == 8)
-	$sem = 'sum';
-else if($mon == 9 || $mon == 10 || $mon == 11)
-	$sem = 2;
-else if($mon == 6) {
-	if(date("j") <= 15)
-		$sem = 1;
-	else if(date("j") > 15)
-		$sem = 'sum';
-}
-else if($mon == 12) {
-	if(date("j") <= 15)
-		$sem = 2;
-	else if(date("j") > 15)
-		$sem = 'win';
-}
-
-require_once 'functions.php';
+$sem = semester();
 
 if(isset($_POST['n']))
 {

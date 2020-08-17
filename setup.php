@@ -15,7 +15,9 @@
 	
 	createTable('codes', 'ID VARCHAR(10), subject VARCHAR(128), code longtext, number int(11),
 				year VARCHAR(4), semester VARCHAR(5), PRIMARY KEY(number)');
-				
+			
+	createTable('session', 'start datetime, IP VARCHAR(20), end datetime');
+		
 	queryMysql("INSERT INTO user VALUES('admin', '12345', 'administer', 'admin', NULL, NULL, NULL)");
 ?>
 

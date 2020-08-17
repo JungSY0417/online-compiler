@@ -1,50 +1,55 @@
 <?php
 session_start();
 
+require_once 'functions.php';
+
+date_default_timezone_set('Asia/Seoul');	//timezone을 한국으로 설정
+
 $user = $_SESSION['user'];
 $subj = $_SESSION['subj'];
 $year = date("Y");
-$mon = date("n");
-
-if($mon == 1 || $mon == 2)
-	$sem = 'win';
-else if($mon == 3 || $mon == 4 || $mon == 5)
-	$sem = 1;
-else if($mon == 7 || $mon == 8)
-	$sem = 'sum';
-else if($mon == 9 || $mon == 10 || $mon == 11)
-	$sem = 2;
-else if($mon == 6) {
-	if(date("j") <= 15)
-		$sem = 1;
-	else if(date("j") > 15)
-		$sem = 'sum';
-}
-else if($mon == 12) {
-	if(date("j") <= 15)
-		$sem = 2;
-	else if(date("j") > 15)
-		$sem = 'win';
-}
-
-require_once 'functions.php';
+$sem = semester();
 
 if(isset($_POST['codearea']))
 {
 	$same = 0;
+	$due = 0;
 	$text = $_POST['codearea'];
+	$now = strtotime(date('Y-m-d H:i:s'));
 
 	$sql = queryMysql("SELECT code FROM codes WHERE ID='$user' AND subject='$subj' AND year='$year' AND semester='$sem'");
 	while($row = mysqli_fetch_array($sql)) {
 		$result = (string)$row[0];
-		if($result == $text)
+		if($result == $text) {
 			$same = 1;
+			break;
+		}
 	}
 	
-	if($same != 1) {
+	$sql = queryMysql("SELECT start, end FROM duedate WHERE subject='$subj'");
+	while($row = mysqli_fetch_array($sql)) {
+		$start = strtotime($row[0]);
+		$end = strtotime($row[1]);
+		
+		$diff1 = $now - $start;
+		$diff2 = $end - $now;
+		if($diff1 >= 0 && $diff2 >= 0) {
+			$due = 1;
+			break;
+		}
+	}
+	
+	if($same != 1 && $due != 0) {
 		$text = str_replace("\\", "\\\\", $text);
 		$text = str_replace("'", "\'", $text);
 		queryMysql("INSERT INTO codes VALUES('$user', '$subj', '$text', '$year', '$sem')");
+		echo "제출 성공";
+	}
+	elseif($same == 1) {
+		echo "이미 제출된 코드입니다";
+	}
+	elseif($due == 0) {
+		echo "제출 기한이 아닙니다";
 	}
 }
 

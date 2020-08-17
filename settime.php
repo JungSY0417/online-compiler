@@ -1,38 +1,33 @@
 <?php
 session_start();
 
-header("Progma:no-cache");
-header("Cache-Control:no-cache,must-revalidate");
+require_once "functions.php";
 
-require_once 'functions.php';
+$error = $msg = "";
 
-$error = $ID = $name = $msg = "";
-$year = date("Y");
-$sem = semester();
-
-if(isset($_POST['ID']))
-{
-	$ID = sanitizeString($_POST['ID']);
-	$name = sanitizeString($_POST['name']);
+if(isset($_POST['starttime'])) {
+	$same = 0;
 	
-	if($ID == "" || $name == "")
-		$error = 'Not all fields were entered';
-	else
-	{
-		$result = queryMysql("SELECT ID, name FROM user
-			WHERE ID='$ID' AND name='$name' AND year='$year' AND semester='$sem'");
-			
-		if($result->num_rows == 0)
-		{
-			$error = "Invalid login attempt";
-		}
-		else
-		{
-			$result = queryMysql("UPDATE user SET password='$ID'
-				WHERE ID='$ID' AND name='$name' AND year='$year' AND semester='$sem'");
-			$msg = "<br><br>비밀번호 초기화 완료";
+	$stime = str_replace("T", " ", $_POST['starttime']);
+	$etime = str_replace("T", " ", $_POST['duetime']);
+	$subj = sanitizeString($_POST['subj']);
+	
+	$sql = queryMysql("SELECT start, end FROM duedate WHERE subject='$subj'");
+	while($row = mysqli_fetch_array($sql)) {
+		$start = substr($row[0], 0, 16);
+		$end = substr($row[1], 0, 16);
+		if($stime == $start && $etime == $end) {
+			$same = 1;
+			break;
 		}
 	}
+
+	if($stime != "" && $etime != "" && $same != 1) {
+		$result = queryMysql("INSERT INTO duedate VALUES('$stime', '$etime', '$subj')");
+		$msg = "마감시간 설정 완료";
+	}
+	elseif($same == 1)
+		$error = "이미 설정된 마감시간입니다";
 }
 
 echo <<<_END
@@ -54,7 +49,7 @@ echo <<<_END
 				font-family: 'Nanum Gothic Coding', monospace;
 			}
 			
-			#resetdiv {
+			#setdiv {
 				padding: 5px 20px;
 				position: absolute;
 				top: 25vh;
@@ -82,17 +77,18 @@ echo <<<_END
 			
 			#subj {
 				position: absolute;
-				left: 170px;
+				left: 85px;
+				width: 237px;
 			}
 			
-			.resetform {
+			.setform {
 				position: absolute;
-				left: 30%;
+				left: 20%;
 				top: 15vh;
-				width: 250px;
+				width: 330px;
 			}
 			
-			.resetform > div {
+			.setform > div {
 				display: flex;
 				justify-content: center;
 				padding-bottom: 7px;
@@ -126,7 +122,7 @@ echo <<<_END
 				font-family: 'Nanum Gothic Coding', monospace;
 			}
 			
-			.settime {
+			.rspw {
 				width: 170px;
 				position: absolute;
 				margin: 160px 5px 0px 5px;
@@ -141,7 +137,7 @@ echo <<<_END
 			.msg {
 				position: absolute;
 				left: 40%;
-				top: 35vh;
+				top: 40vh;
 			}
 			
 			.exit {
@@ -171,10 +167,10 @@ _END;
 if($_SESSION['user'] == 'admin') {
 	echo <<<_END
 		<body>
-			<h2 align='center'>Reset Password</h2>
+			<h2 align='center'>Set Submit Time</h2>
 			<hr size='1' noshade></hr>
-			<div id='resetdiv'>
-				<form class='resetform' action="resetpw.php" method="post" enctype='multipart/form-data'>
+			<div id='setdiv'>
+				<form class='setform' action="settime.php" method="post" enctype='multipart/form-data'>
 					<div>
 						<span class='error'>$error</span>
 					</div>
@@ -182,17 +178,21 @@ if($_SESSION['user'] == 'admin') {
 						<span>$success</span>
 					</div>
 					<div>
-						<label>학번</label>
-						<input type="text" name="ID" id="ID"></input>
+						<label>시작 날짜</label>
+						<input type="datetime-local" name="starttime" id="starttime"></input>
 					</div>
 					<div>
-						<label>이름</label>
-						<input type="text" name="name" id="name"></input>
+						<label>마감 날짜</label>
+						<input type="datetime-local" name="duetime" id="duetime"></input>
+					</div>
+					<div>
+						<label>과목 입력</label>
+						<input type="text" name="subj" id="subj"></input>
 					</div>
 					<div>
 						<label></label>
 						<br><br>
-						<input class='submit' type='submit'>
+						<input class='submit' type='submit'></input>
 					</div>
 				</form>
 				<div class='msg'>$msg</div>
@@ -206,8 +206,8 @@ if($_SESSION['user'] == 'admin') {
 				<input class='expr' type='submit' value='예제프로그램 업로드'></input>
 			</form>
 			
-			<form id='settimeform' method='POST' action='settime.php'>
-				<input class='settime' type='submit' value='마감 날짜 설정'></input>
+			<form id='resetpw' method='POST' action='resetpw.php'>
+				<input class='rspw' type='submit' value='비밀번호 초기화'></input>
 			</form>
 			
 			<form id='logout' method='POST' action='logout.php' align='right'>

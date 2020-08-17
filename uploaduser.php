@@ -7,28 +7,7 @@ setlocale(LC_CTYPE, 'ko_KR.eucKR'); //CSV데이타 추출시 한글깨짐방지
 
 $error = $success = $msg = "";
 $year = date("Y");
-$mon = date("n");
-
-if($mon == 1 || $mon == 2)
-	$sem = 'win';
-else if($mon == 3 || $mon == 4 || $mon == 5)
-	$sem = 1;
-else if($mon == 7 || $mon == 8)
-	$sem = 'sum';
-else if($mon == 9 || $mon == 10 || $mon == 11)
-	$sem = 2;
-else if($mon == 6) {
-	if(date("j") <= 15)
-		$sem = 1;
-	else if(date("j") > 15)
-		$sem = 'sum';
-}
-else if($mon == 12) {
-	if(date("j") <= 15)
-		$sem = 2;
-	else if(date("j") > 15)
-		$sem = 'win';
-}
+$sem = semester();
 
 function getExt($filename){
 	$ext = substr(strrchr($filename,"."),1);
@@ -186,11 +165,13 @@ echo <<<_END
 		<link rel='stylesheet' href="https://ajax.googleapis.com/ajax/libs/jquerymobile/1.4.5/jquery.mobile.min.css">
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 		<script src="https://ajax.googleapis.com/ajax/libs/jquerymobile/1.4.5/jquery.mobile.min.js"></script>
+		<link href="https://fonts.googleapis.com/css2?family=Nanum+Gothic+Coding:wght@700&display=swap" rel="stylesheet">
 
 		<title>Upload Students</title>
 		<style>
 			body {
 				position: relative;
+				font-family: 'Nanum Gothic Coding', monospace;
 			}
 			
 			#uploaddiv {
@@ -211,7 +192,7 @@ echo <<<_END
 				position: absolute;
 				height: 85vh;
 				border-right: 0.7px solid;
-				background: rgb(25, 0, 130);
+				background: #4F86C6;
 			}
 			
 			#logout {
@@ -250,19 +231,54 @@ echo <<<_END
 			}
 			
 			.expr {
-				margin: 40px 5px 0px 5px;
+				width: 170px;
+				margin: 40px 10px 0px 5px;
+				padding: 2px;
+				border: 1px solid #353866;
 				border-radius: 6px;
+				background-color: white;
+				color: #353866;
+				font-family: 'Nanum Gothic Coding', monospace;
 			}
 			
 			.rspw {
+				width: 170px;
 				position: absolute;
-				margin: 100px 5px 0px 20px;
+				margin: 100px 5px 0px 5px;
+				padding: 2px;
+				border: 1px solid #353866;
 				border-radius: 6px;
+				background-color: white;
+				color: #353866;
+				font-family: 'Nanum Gothic Coding', monospace;
+			}
+			
+			.settime {
+				width: 170px;
+				position: absolute;
+				margin: 160px 5px 0px 5px;
+				padding: 2px;
+				border: 1px solid #353866;
+				border-radius: 6px;
+				background-color: white;
+				color: #353866;
+				font-family: 'Nanum Gothic Coding', monospace;
 			}
 			
 			.exit {
-				margin-left: 45px;
-				border-radius: 6px;s
+				width: 170px;
+				margin-left: 5px;
+				padding: 2px;
+				border: 1px solid #353866;
+				border-radius: 6px;
+				background-color: white;
+				color: #353866;
+				font-family: 'Nanum Gothic Coding', monospace;
+			}
+			
+			.submit, #file {
+				padding: 6px;
+				font-family: 'Nanum Gothic Coding', monospace;
 			}
 			
 			label {
@@ -289,7 +305,7 @@ if($_SESSION['user'] == 'admin') {
 					<div>
 						<label></label>
 						<br><br>
-						<input data-transition='slide' type='submit'>
+						<input class='submit' type='submit'>
 					</div>
 				</form>
 				<div class='msg'>$msg</div>
@@ -301,6 +317,10 @@ if($_SESSION['user'] == 'admin') {
 			
 			<form id='resetpw' method='POST' action='resetpw.php'>
 				<input class='rspw' type='submit' value='비밀번호 초기화'></input>
+			</form>
+			
+			<form id='settimeform' method='POST' action='settime.php'>
+				<input class='settime' type='submit' value='마감 날짜 설정'></input>
 			</form>
 			
 			<form id='logout' method='POST' action='logout.php' align='right'>

@@ -1,33 +1,12 @@
 <?php
 session_start();
 
+require_once 'functions.php';
+
 $user = $_SESSION['user'];
 $subj = $_SESSION['subj'];
 $year = date("Y");
-$mon = date("n");
-
-if($mon == 1 || $mon == 2)
-	$sem = 'win';
-else if($mon == 3 || $mon == 4 || $mon == 5)
-	$sem = 1;
-else if($mon == 7 || $mon == 8)
-	$sem = 'sum';
-else if($mon == 9 || $mon == 10 || $mon == 11)
-	$sem = 2;
-else if($mon == 6) {
-	if(date("j") <= 15)
-		$sem = 1;
-	else if(date("j") > 15)
-		$sem = 'sum';
-}
-else if($mon == 12) {
-	if(date("j") <= 15)
-		$sem = 2;
-	else if(date("j") > 15)
-		$sem = 'win';
-}
-
-require_once 'functions.php';
+$sem = semester();
 
 echo <<<_END
 <!DOCTYPE html>
@@ -106,6 +85,7 @@ if(isset($_SESSION['user'])) {
 					</select>
 					<input class='button' type='submit' id='run' value='RUN'></input>
 					<button class='button' type='button' onclick="download()">Download Code</button>
+					<button id='submit' class='button' type='button' onclick="savecode()">Submit</button>
 					<textarea id='codearea' name='codearea' spellcheck="false" autofocus></textarea>
 	
 					<legend id='inputlegend' style='display:none'>Input</legend>
@@ -125,13 +105,14 @@ if(isset($_SESSION['user'])) {
 	    			});
 					
 					$(document).ready(function(){
-						$("#run").click(function(){
-							$("#resultarea").html("Loading ......");
-							
+						$("#submit").click(function(){
 							$.ajax({
 								type: "POST",
 								url: "saveprogram.php",
 								data: {"codearea": document.getElementById('codearea').value},
+								success: function(result) {
+									alert(result);
+								}
 							});
 						});
 					});

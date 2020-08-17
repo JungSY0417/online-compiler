@@ -8,28 +8,7 @@ require_once 'functions.php';
 
 $error = $user = $pass = $subj = "";
 $year = date("Y");
-$mon = date("n");
-
-if($mon == 1 || $mon == 2)
-	$sem = 'win';
-else if($mon == 3 || $mon == 4 || $mon == 5)
-	$sem = 1;
-else if($mon == 7 || $mon == 8)
-	$sem = 'sum';
-else if($mon == 9 || $mon == 10 || $mon == 11)
-	$sem = 2;
-else if($mon == 6) {
-	if(date("j") <= 15)
-		$sem = 1;
-	else if(date("j") > 15)
-		$sem = 'sum';
-}
-else if($mon == 12) {
-	if(date("j") <= 15)
-		$sem = 2;
-	else if(date("j") > 15)
-		$sem = 'win';
-}
+$sem = semester();
 
 if(isset($_POST['user']))
 {
@@ -120,7 +99,6 @@ echo <<<_END
 			}
 			
 			a {
-				flex: 1;
 				text-align: left;
 				text-decoration:none;
 			}
@@ -153,6 +131,7 @@ echo <<<_END
 				</div>
 				<div>
 					<a data-transition='slide' href='changepw.php'>비밀번호 변경</a>
+					<label></label>
 					<input data-transition='slide' type='submit' value='Login'>
 				</div>
 			</form>
