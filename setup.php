@@ -14,7 +14,7 @@
 				email VARCHAR(128), year VARCHAR(4), semester VARCHAR(5), PRIMARY KEY(ID)');
 	
 	createTable('codes', 'ID VARCHAR(10), subject VARCHAR(128), code longtext, number int(11),
-				year VARCHAR(4), semester VARCHAR(5), PRIMARY KEY(number)');
+				year VARCHAR(4), semester VARCHAR(5), time DATETIME DEFAULT current_timestamp, PRIMARY KEY(number)');
 			
 	createTable('session', 'start datetime, IP VARCHAR(20), end datetime');
 		

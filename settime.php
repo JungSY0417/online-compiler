@@ -45,8 +45,16 @@ echo <<<_END
 		<title>Upload Example Programs</title>
 		<style>
 			body {
+				margin: 0;
+				padding: 0;
 				position: relative;
 				font-family: 'Nanum Gothic Coding', monospace;
+			}
+			
+			#title {
+				position: fixed;
+				width: 100%;
+				background-color: white;
 			}
 			
 			#setdiv {
@@ -64,15 +72,18 @@ echo <<<_END
 			}
 			
 			#uploadstd {
-				position: absolute;
-				height: 85vh;
+				position: fixed;
+				top: 13vh;
+				height: 87vh;
 				border-right: 0.7px solid;
 				background: #4F86C6;
 			}
 			
-			#logout {
-				position: absolute;
-				top: 87vh;
+			#exprogram, #resetpw, #settimeform, #submittedform, #logout {
+				height: 5px;
+				width: 170px;
+				position: fixed;
+				top: 13vh;
 			}
 			
 			#subj {
@@ -134,6 +145,30 @@ echo <<<_END
 				font-family: 'Nanum Gothic Coding', monospace;
 			}
 			
+			.settime {
+				width: 170px;
+				position: absolute;
+				margin: 220px 5px 0px 5px;
+				padding: 2px;
+				border: 1px solid #353866;
+				border-radius: 6px;
+				background-color: white;
+				color: #353866;
+				font-family: 'Nanum Gothic Coding', monospace;
+			}
+			
+			.submitted {
+				width: 170px;
+				position: absolute;
+				margin: 280px 5px 0px 5px;
+				padding: 2px;
+				border: 1px solid #353866;
+				border-radius: 6px;
+				background-color: white;
+				color: #353866;
+				font-family: 'Nanum Gothic Coding', monospace;
+			}
+			
 			.msg {
 				position: absolute;
 				left: 40%;
@@ -142,7 +177,7 @@ echo <<<_END
 			
 			.exit {
 				width: 170px;
-				margin-left: 5px;
+				margin: 480px 5px 0px 5px;
 				padding: 2px;
 				border: 1px solid #353866;
 				border-radius: 6px;
@@ -167,8 +202,10 @@ _END;
 if($_SESSION['user'] == 'admin') {
 	echo <<<_END
 		<body>
-			<h2 align='center'>Set Submit Time</h2>
-			<hr size='1' noshade></hr>
+			<div id='title'>
+				<h2 align='center'>Set Submit Time</h2>
+				<hr size='1' noshade></hr>
+			</div>
 			<div id='setdiv'>
 				<form class='setform' action="settime.php" method="post" enctype='multipart/form-data'>
 					<div>
@@ -208,6 +245,14 @@ if($_SESSION['user'] == 'admin') {
 			
 			<form id='resetpw' method='POST' action='resetpw.php'>
 				<input class='rspw' type='submit' value='비밀번호 초기화'></input>
+			</form>
+			
+			<form id='settimeform' method='POST' action='settime.php'>
+				<input class='settime' type='submit' value='마감 날짜 설정'></input>
+			</form>
+			
+			<form id='submittedform' method='POST' action='submittedfile.php'>
+				<input class='submitted' type='submit' value='제출 프로그램 보기'></input>
 			</form>
 			
 			<form id='logout' method='POST' action='logout.php' align='right'>

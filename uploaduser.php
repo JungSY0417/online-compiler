@@ -170,8 +170,16 @@ echo <<<_END
 		<title>Upload Students</title>
 		<style>
 			body {
+				margin: 0;
+				padding: 0;
 				position: relative;
 				font-family: 'Nanum Gothic Coding', monospace;
+			}
+			
+			#title {
+				position: fixed;
+				width: 100%;
+				background-color: white;
 			}
 			
 			#uploaddiv {
@@ -188,20 +196,23 @@ echo <<<_END
 				align-items: center;
 			}
 			
-			#exprogram {
-				position: absolute;
-				height: 85vh;
+			#uploadstd {
+				position: fixed;
+				top: 13vh;
+				height: 87vh;
 				border-right: 0.7px solid;
 				background: #4F86C6;
 			}
 			
-			#logout {
-				position: absolute;
-				top: 87vh;
+			#exprogram, #resetpw, #settimeform, #submittedform, #logout {
+				height: 5px;
+				width: 170px;
+				position: fixed;
+				top: 13vh;
 			}
 			
 			.uploadform {
-				width: 400px;
+				width: 380px;
 			}
 			
 			.uploadform > div {
@@ -230,9 +241,21 @@ echo <<<_END
 				top: 25vh;
 			}
 			
-			.expr {
+			.std {
 				width: 170px;
 				margin: 40px 10px 0px 5px;
+				padding: 2px;
+				border: 1px solid #353866;
+				border-radius: 6px;
+				background-color: white;
+				color: #353866;
+				font-family: 'Nanum Gothic Coding', monospace;
+			}
+			
+			.expr {
+				width: 170px;
+				position: absolute;
+				margin: 100px 10px 0px 5px;
 				padding: 2px;
 				border: 1px solid #353866;
 				border-radius: 6px;
@@ -244,7 +267,7 @@ echo <<<_END
 			.rspw {
 				width: 170px;
 				position: absolute;
-				margin: 100px 5px 0px 5px;
+				margin: 160px 5px 0px 5px;
 				padding: 2px;
 				border: 1px solid #353866;
 				border-radius: 6px;
@@ -256,7 +279,19 @@ echo <<<_END
 			.settime {
 				width: 170px;
 				position: absolute;
-				margin: 160px 5px 0px 5px;
+				margin: 220px 5px 0px 5px;
+				padding: 2px;
+				border: 1px solid #353866;
+				border-radius: 6px;
+				background-color: white;
+				color: #353866;
+				font-family: 'Nanum Gothic Coding', monospace;
+			}
+			
+			.submitted {
+				width: 170px;
+				position: absolute;
+				margin: 280px 5px 0px 5px;
 				padding: 2px;
 				border: 1px solid #353866;
 				border-radius: 6px;
@@ -267,7 +302,7 @@ echo <<<_END
 			
 			.exit {
 				width: 170px;
-				margin-left: 5px;
+				margin: 480px 5px 0px 5px;
 				padding: 2px;
 				border: 1px solid #353866;
 				border-radius: 6px;
@@ -292,8 +327,10 @@ _END;
 if($_SESSION['user'] == 'admin') {
 	echo <<<_END
 		<body>
-			<h2 align='center'>Upload Students</h2>
-			<hr size='1' noshade></hr>
+			<div id='title'>
+				<h2 align='center'>Upload Students</h2>
+				<hr size='1' noshade></hr>
+			</div>
 			<div id='uploaddiv'>
 				<div class='error'>$error</div>
 				<div class='success'>$success</div>
@@ -311,6 +348,10 @@ if($_SESSION['user'] == 'admin') {
 				<div class='msg'>$msg</div>
 			</div>
 			
+			<form id='uploadstd' method='POST' action='uploaduser.php'>
+				<input class='std' type='submit' value='학생 정보 업로드'></input>
+			</form>
+			
 			<form id='exprogram' method='POST' action='uploadexpg.php'>
 				<input class='expr' type='submit' value='예제프로그램 업로드'></input>
 			</form>
@@ -321,6 +362,10 @@ if($_SESSION['user'] == 'admin') {
 			
 			<form id='settimeform' method='POST' action='settime.php'>
 				<input class='settime' type='submit' value='마감 날짜 설정'></input>
+			</form>
+			
+			<form id='submittedform' method='POST' action='submittedfile.php'>
+				<input class='submitted' type='submit' value='제출 프로그램 보기'></input>
 			</form>
 			
 			<form id='logout' method='POST' action='logout.php' align='right'>

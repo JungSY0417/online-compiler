@@ -3,104 +3,6 @@ session_start();
 
 require_once "functions.php";
 
-$user = $_SESSION['user'];
-$subj = sanitizeString($_POST['subj']);
-$year = date("Y");
-$sem = semester();
-
-setlocale(LC_CTYPE, 'ko_KR.eucKR'); //CSV데이타 추출시 한글깨짐방지
-
-$error = $success = $msg = "";
-
-function getExt($filename){
-	$ext = substr(strrchr($filename,"."),1);
-	$ext = strtolower($ext);
-	return $ext;
-}
-			
-function detectFileEncoding($filepath) {
-	// 리눅스 기본 기능을 활용한 파일 인코딩 검사
-	$output = array();
-	exec('file -i ' . $filepath, $output);
-	if (isset($output[0])){
-		$ex = explode('charset=', $output[0]);
-		return isset($ex[1]) ? $ex[1] : null;
-	}
-	return null;
-}
-
-if($_FILES['file']['name'] != "") {
-
-	if($subj == "") {
-		$error = "과목명을 입력해주세요";
-	}
-	else {
-	    //if there was an error uploading the file
-	    if($_FILES["file"]["error"] > 0) {
-	        $error = "Return Code: " . $_FILES["file"]["error"] . "<br>";
-	    }
-	    else {
-	        //Print file details
-	        $success = "Uploaded File Name: " . $_FILES["file"]["name"] . "<br><br>";
-			
-	    	// Edit upload location here
-			$tmpname = $_FILES['file']['tmp_name'];
-			$realname = $_FILES['file']['name'];
-			$subj = $_POST['subj'];
-			
-			$fileExt = getExt($realname);
-			if (!strstr('[c]',$fileExt)) {
-			    $error = "c 파일만 등록할 수 있습니다.<br>";
-			}
-			else {
-				$readFile = "example.c";
-				
-				$errorFile ="errorFile.txt"; 
-				
-				$TABLENAME ='user'; // 테이블명
-				
-				if (is_uploaded_file($tmpname)) {
-		
-				    move_uploaded_file($tmpname,$readFile);
-				    @chmod($readFile,0606);
-				}
-				
-				$file_read = fopen($readFile,"r");
-				if(!$file_read){
-				    $error = "파일을 찾을 수가 없습니다!<br>";
-				}
-				
-				// 파일 인코딩 모드 검사
-				$current_encoding = detectFileEncoding($readFile);
-				
-				$code = fread($file_read,filesize("example.c"));
-				
-				//이미 있는 프로그램인지 검사
-				$same = 0;
-				$sql = queryMysql("SELECT code FROM codes WHERE ID='$user' AND subject='$subj' AND year='$year' AND semester='$sem'");
-				while($row = mysqli_fetch_array($sql)) {
-					$result = (string)$row[0];
-					if($result == $code)
-						$same = 1;
-				}
-			
-				if($same != 1) {
-					$code = str_replace("\\", "\\\\", $code);
-					$code = str_replace("'", "\'", $code);
-					$result = queryMysql("INSERT INTO codes VALUES('$user', '$subj', '$code', '$year', '$sem')");
-					$msg = "프로그램 업로딩 성공";
-				}
-				else {
-					$msg = "이미 있는 프로그램입니다.";
-				}
-				
-				fclose($file_read);
-				unlink($readFile);  // 업로드 완료후에 파일 삭제 처리
-			}
-		}
-	}
-}
-
 echo <<<_END
 <!DOCTYPE html>
 <html>
@@ -126,15 +28,15 @@ echo <<<_END
 				position: fixed;
 				width: 100%;
 				background-color: white;
+				z-index: 10;
 			}
 			
-			#uploaddiv {
+			#setdiv {
 				padding: 5px 20px;
 				position: absolute;
-				top: 25vh;
-				left: 30%;
-				width: 450px;
-				height: 250px;
+				top: 15vh;
+				left: 20%;
+				width: 70%;
 
 				display: flex;
 				flex-direction: column;
@@ -157,16 +59,14 @@ echo <<<_END
 				top: 13vh;
 			}
 			
-			#subj {
+			.setform {
 				position: absolute;
-				left: 190px;
+				left: 20%;
+				top: 15vh;
+				width: 330px;
 			}
 			
-			.uploadform {
-				width: 450px;
-			}
-			
-			.uploadform > div {
+			.setform > div {
 				display: flex;
 				justify-content: center;
 				padding-bottom: 7px;
@@ -174,16 +74,7 @@ echo <<<_END
 			}
 			
 			.error {
-				position: absolute;
-				left: 35%;
-				top: 5vh;
 				color: red;
-			}
-			
-			.success {
-				position: absolute;
-				left: 25%;
-				top: 0vh;
 			}
 			
 			.std {
@@ -199,8 +90,7 @@ echo <<<_END
 			
 			.expr {
 				width: 170px;
-				position: absolute;
-				margin: 100px 10px 0px 5px;
+				margin: 100px 5px 0px 5px;
 				padding: 2px;
 				border: 1px solid #353866;
 				border-radius: 6px;
@@ -211,7 +101,6 @@ echo <<<_END
 			
 			.rspw {
 				width: 170px;
-				position: absolute;
 				margin: 160px 5px 0px 5px;
 				padding: 2px;
 				border: 1px solid #353866;
@@ -223,7 +112,6 @@ echo <<<_END
 			
 			.settime {
 				width: 170px;
-				position: absolute;
 				margin: 220px 5px 0px 5px;
 				padding: 2px;
 				border: 1px solid #353866;
@@ -235,7 +123,6 @@ echo <<<_END
 			
 			.submitted {
 				width: 170px;
-				position: absolute;
 				margin: 280px 5px 0px 5px;
 				padding: 2px;
 				border: 1px solid #353866;
@@ -247,8 +134,8 @@ echo <<<_END
 			
 			.msg {
 				position: absolute;
-				left: 30%;
-				top: 35vh;
+				left: 40%;
+				top: 40vh;
 			}
 			
 			.exit {
@@ -262,7 +149,7 @@ echo <<<_END
 				font-family: 'Nanum Gothic Coding', monospace;
 			}
 			
-			.submit, #file {
+			.submit {
 				padding: 6px;
 				font-family: 'Nanum Gothic Coding', monospace;
 			}
@@ -270,6 +157,19 @@ echo <<<_END
 			label {
 				flex: 1;
 				text-align: left;
+			}
+			
+			table {
+		        width: 100%;
+		    }
+			
+		    th, td {
+		    	padding: 10px;
+		    	border-bottom: 1px solid #dadada;
+		    }
+			
+			a {
+				text-decoration:none;
 			}
 		</style>
 	</head>
@@ -279,28 +179,63 @@ if($_SESSION['user'] == 'admin') {
 	echo <<<_END
 		<body>
 			<div id='title'>
-				<h2 align='center'>Upload Example Programs</h2>
+				<h2 align=center>Show Submitted File</h2>
 				<hr size='1' noshade></hr>
 			</div>
-			<div id='uploaddiv'>
-				<div class='error'>$error</div>
-				<div class='success'>$success</div>
-				<form class='uploadform' action="uploadexpg.php" method="post" enctype='multipart/form-data'>
-					<div>
-						<label>예제 프로그램 선택</label>
-						<input type="file" name="file" id="file"></input>
-					</div>
-					<div>
-						<label>과목 입력</label>
-						<input type="text" name="subj" id="subj"></input>
-					</div>
-					<div>
-						<label></label>
-						<br><br>
-						<input class='submit' type='submit'>
-					</div>
-				</form>
-				<div class='msg'>$msg</div>
+			<div id='setdiv'>
+				<div>
+					<span class='error'>$error</span>
+				</div>
+	_END;
+	if(isset($_GET['subj']) && isset($_GET['time'])) {
+		echo <<<_TABLE
+					<table>
+						<thead>
+							<tr>
+								<th>ID</th>
+								<th>code</th>
+							</tr>
+						</thead>
+						<tbody>
+			_TABLE;
+		$subj = $_GET['subj'];
+		$time = explode('~', $_GET['time']);
+		$sql = queryMysql("SELECT DISTINCT ID FROM codes WHERE time>='$time[0]' AND time<='$time[1]' AND subject='$subj' AND ID!='admin'");
+		while($row = mysqli_fetch_array($sql)) {
+			$ID = $row[0];
+			$result = queryMysql("SELECT code FROM codes WHERE ID='$ID' AND subject='$subj' AND time>='$time[0]' AND time<='$time[1]' ORDER BY time DESC limit 1");
+			$rows = mysqli_fetch_array($result);
+			$code = htmlspecialchars($rows[0]);
+			echo "<tr><td>$ID</td><td><pre>$code</pre></td></tr>";
+		}
+		echo "</tbody></table>";
+		$sql->close();
+	}
+	elseif(isset($_GET['subj'])) {
+		echo "<table><thead><tr><th>시작시간</th><th>종료시간</th></tr></thead><tbody>";
+		$subj = $_GET['subj'];
+		$sql = queryMysql("SELECT start, end FROM duedate WHERE subject='$subj'");
+		while($row = mysqli_fetch_array($sql)) {
+			$start = $row[0];
+			$end = $row[1];
+			$time = $start . '&' . $end;
+			echo "<tr><td><a href='submittedfile.php?subj=$subj&time=$start~$end'>$start</a></td><td><a href='submittedfile.php?subj=$subj&time=$start~$end'>$start</a></td></tr>";
+		}
+		echo "</tbody></table>";
+		$sql->close();
+	}
+	else {
+		echo "<table><thead><tr><th>과목</th></tr></thead><tbody>";
+		$sql = queryMysql("SELECT DISTINCT subject FROM duedate");
+		while ($row = mysqli_fetch_array($sql))
+		{
+			$subj = $row[0];
+			echo "<tr><td><a href='submittedfile.php?subj=$subj'>$subj</a></td></tr>";
+		}
+		echo "</tbody></table>";
+		$sql->close();
+	}
+	echo <<<_END
 			</div>
 			
 			<form id='uploadstd' method='POST' action='uploaduser.php'>
@@ -323,7 +258,7 @@ if($_SESSION['user'] == 'admin') {
 				<input class='submitted' type='submit' value='제출 프로그램 보기'></input>
 			</form>
 			
-			<form id='logout' method='POST' action='logout.php' align='right'>
+			<form id='logout' method='POST' action='logout.php'>
 				<input type='submit' class='exit' value='로그아웃'></input>
 			</form>
 		</body>

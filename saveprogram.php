@@ -42,7 +42,8 @@ if(isset($_POST['codearea']))
 	if($same != 1 && $due != 0) {
 		$text = str_replace("\\", "\\\\", $text);
 		$text = str_replace("'", "\'", $text);
-		queryMysql("INSERT INTO codes VALUES('$user', '$subj', '$text', '$year', '$sem')");
+		$now = date("Y-m-d H:i:s");
+		queryMysql("INSERT INTO codes VALUES('$user', '$subj', '$text', '$year', '$sem', '$now')");
 		echo "제출 성공";
 	}
 	elseif($same == 1) {
